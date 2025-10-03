@@ -10,6 +10,7 @@
 
 ## 用法
 
+### 方式一：直接运行（推荐）
 
 ```shell
 # 使用本 fork 版本(支持备注功能)
@@ -22,6 +23,31 @@ bash <(curl -fsSL https://raw.githubusercontent.com/occamrazor1492/iptablesUtils
 bash <(curl -fsSL https://www.arloor.com/sh/iptablesUtils/natcfg.sh)
 # 原版 - GitHub直连
 bash <(curl -fsSL https://raw.githubusercontent.com/arloor/iptablesUtils/master/natcfg.sh)
+```
+
+### 方式二：下载后运行
+
+如果你希望先下载脚本文件到本地再运行：
+
+```shell
+# 下载增强版本(支持备注功能)
+wget https://raw.githubusercontent.com/occamrazor1492/iptablesUtils/master/natcfg.sh
+# 或使用 curl
+curl -fsSL https://raw.githubusercontent.com/occamrazor1492/iptablesUtils/master/natcfg.sh -o natcfg.sh
+
+# 然后运行
+bash natcfg.sh
+```
+
+下载原版（不支持备注功能）：
+```shell
+# 下载原版
+wget https://raw.githubusercontent.com/arloor/iptablesUtils/master/natcfg.sh
+# 或使用 curl
+curl -fsSL https://raw.githubusercontent.com/arloor/iptablesUtils/master/natcfg.sh -o natcfg.sh
+
+# 然后运行
+bash natcfg.sh
 ```
 
 输出如下：
