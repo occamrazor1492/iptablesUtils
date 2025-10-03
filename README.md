@@ -4,6 +4,7 @@
 
 1. 便捷地设置iptables流量转发规则
 2. 当域名解析的地址发生变化时，自动更新流量转发规则，不需要手动变更（适用于ddns域名）
+3. 支持为转发规则添加备注，方便管理和识别规则用途
 
 ## 用法
 
@@ -36,11 +37,36 @@ bash <(curl -fsSL https://raw.githubusercontent.com/arloor/iptablesUtils/master/
 
 此时按照需要，输入1-4中的任意数字，然后按照提示即可
 
+### 备注功能
+
+在添加转发规则时，现在支持为规则添加备注信息：
+
+1. 选择"增加转发规则"
+2. 输入本地端口号
+3. 输入远程端口号 
+4. 输入目标域名/IP
+5. **输入备注(可选)**：为这个规则添加描述，方便后续管理
+
+示例：
+```
+本地端口号:8080
+远程端口号:80
+目标域名/IP:example.com
+备注(可选):网站代理服务
+```
+
+查看规则时将显示：
+```
+转发规则： 8080>example.com:80 备注: 网站代理服务
+```
+
 ## 卸载
 
 ```shell
 wget --no-check-certificate -qO uninstall.sh https://raw.githubusercontent.com/arloor/iptablesUtils/master/dnat-uninstall.sh && bash uninstall.sh
 ```
+
+卸载脚本会自动清理所有配置文件，包括主配置文件和备注文件
 
 ## 查看日志
 
@@ -50,11 +76,19 @@ journalctl -exu dnat
 
 ## 配置文件备份和导入导出
 
-配置文件在
-
+### 主配置文件
 ```shell
 /etc/dnat/conf
 ```
+存储所有转发规则，格式：`本地端口>目标域名:目标端口`
+
+### 备注文件
+```shell
+/etc/dnat/notes
+```
+存储规则对应的备注信息，格式：`本地端口>目标域名:目标端口#备注内容`
+
+**注意**：备份配置时请同时备份两个文件以保持完整性
 
 ## trojan转发
 
