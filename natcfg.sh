@@ -4,7 +4,9 @@ black="\033[0m"
 base=/etc/dnat
 mkdir $base 2>/dev/null
 conf=$base/conf
+notesFile=$base/notes
 touch $conf
+touch $notesFile
 
 # wget wget --no-check-certificate -qO natcfg.sh http://blog.arloor.com/sh/iptablesUtils/natcfg.sh && bash natcfg.sh
 
@@ -200,6 +202,7 @@ addDnat(){
     local localport=
     local remoteport=
     local remotehost=
+    local note=
     local valid=
     echo -n "本地端口号:" ;read localport
     echo -n "远程端口号:" ;read remoteport
@@ -211,6 +214,7 @@ addDnat(){
     }
 
     echo -n "目标域名/IP:" ;read remotehost
+    echo -n "备注(可选):" ;read note
     # # 检查输入的不是IP
     # if [ "$remotehost" = "" -o "$(echo  $remotehost |grep -E -o '([0-9]{1,3}[\.]){3}[0-9]{1,3}')" != "" ];then
     #     isip=true
@@ -219,13 +223,22 @@ addDnat(){
     #     return 1
     # fi
 
+    # 更新主配置文件
     sed -i "s/^$localport.*/$localport>$remotehost:$remoteport/g" $conf
     [ "$(cat $conf|grep "$localport>$remotehost:$remoteport")" = "" ]&&{
             cat >> $conf <<LINE
 $localport>$remotehost:$remoteport
 LINE
     }
-    echo "成功添加转发规则 $localport>$remotehost:$remoteport"
+    
+    # 处理备注信息
+    sed -i "/^$localport>.*#/d" $notesFile 2>/dev/null
+    if [ "$note" != "" ]; then
+        echo "$localport>$remotehost:$remoteport#$note" >> $notesFile
+        echo "成功添加转发规则 $localport>$remotehost:$remoteport (备注: $note)"
+    else
+        echo "成功添加转发规则 $localport>$remotehost:$remoteport"
+    fi
     setupService
 }
 
@@ -233,7 +246,8 @@ rmDnat(){
     local localport=
     echo -n "本地端口号:" ;read localport
     sed -i "/^$localport>.*/d" $conf
-    echo "done!"
+    sed -i "/^$localport>.*#/d" $notesFile 2>/dev/null
+    echo "删除完成！"
 }
 
 testVars(){
@@ -264,7 +278,13 @@ do
     arr2=(`echo $cell|tr ":" " "|tr ">" " "`)  #arr2=16 REJECT 0.0.0.0/0
     # 过滤非法的行
     [ "${arr2[2]}" != "" -a "${arr2[3]}" = "" ]&& testVars ${arr2[0]}  ${arr2[1]} ${arr2[2]}&&{
-        echo "转发规则： ${arr2[0]}>${arr2[1]}:${arr2[2]}"
+        # 查找对应的备注
+        local note=$(grep "^$cell#" $notesFile 2>/dev/null | cut -d'#' -f2)
+        if [ "$note" != "" ]; then
+            echo "转发规则： ${arr2[0]}>${arr2[1]}:${arr2[2]} 备注: $note"
+        else
+            echo "转发规则： ${arr2[0]}>${arr2[1]}:${arr2[2]}"
+        fi
     }
 done
 }
